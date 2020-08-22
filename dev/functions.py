@@ -9,6 +9,10 @@ from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import r2_score
 import datetime as dt
 from IPython.display import Image
+from bs4 import BeautifulSoup
+import unidecode
+import en_core_web_sm
+import spacy
 
 
 def display_circles(pcs, n_comp, pca,
@@ -319,3 +323,71 @@ def affect_cluster_name(df, cluster, dict):
     df.drop(columns='cluster', inplace=True)
 
     return df
+
+
+# Function to preprocess text
+def preprocess(text):
+    """[summary]
+
+    Args:
+        text ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    # Create Doc object
+    doc = nlp(text, disable=['ner', 'parser'])
+    # Generate lemmas
+    lemmas = [token.lemma_ for token in doc]
+    # Remove stopwords and non-alphabetic characters
+    a_lemmas = [lemma for lemma in lemmas
+                if lemma.isalpha() and lemma not in stopwords]
+
+    return ' '.join(a_lemmas)
+
+def find_persons(text):
+    # Create Doc object
+    nlp = en_core_web_sm.load()
+    doc = nlp(text)
+    
+    # Identify the persons
+    persons = [ent.text for ent in doc.ents if ent.label_ == 'PERSON']
+    
+    # Return persons
+    return persons
+
+def strip_html_tags(text):
+    """remove html tags from text"""
+    soup = BeautifulSoup(text, "html.parser")
+    stripped_text = soup.get_text(separator=" ")
+    return stripped_text
+
+def remove_accented_chars(text):
+    """remove accented characters from text, e.g. café"""
+    text = unidecode.unidecode(text)
+    return text
+
+def extract_preformattext_imageurl(text):
+    """remove preformat text and image bloc"""
+    soup = BeautifulSoup(text, "html.parser")
+    for p in soup.select('pre'):
+        p.extract()
+    for i in soup.select('a'):
+        i.extract()
+    p_text = soup.get_text(separator=" ")
+    return p_text
+
+def token_text(text):
+    nlp = en_core_web_sm.load()
+    doc = nlp(text)
+    tokens = [token.text for token in doc]
+    return tokens
+
+def remove_stopwords_PRON(text):
+    nlp = en_core_web_sm.load()
+    doc = nlp(text)
+    stopwords = spacy.lang.en.stop_words.STOP_WORDS
+    lemmas = [token.lemma_ for token in doc]
+    a_lemmas = [lemma for lemma in lemmas if lemma.isalpha() and lemma not in stopwords]
+    text_lemma = ' '.join(a_lemmas)
+    return text_lemma
