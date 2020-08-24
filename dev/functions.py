@@ -20,7 +20,7 @@ def display_circles(pcs, n_comp, pca,
                     label_rotation=0, lims=None):
     # On affiche les 3 premiers plans factoriels
     # donc les 6 premières composantes
-    for d1, d2 in axis_ranks:  
+    for d1, d2 in axis_ranks:
         if d2 < n_comp:
 
             # initialisation de la figure
@@ -311,7 +311,7 @@ def affect_cluster_name(df, cluster, dict):
         dict (dict): Nom des clusters
 
     Returns:
-        dataframe: Retourne le dataframe avec les clusters 
+        dataframe: Retourne le dataframe avec les clusters
         correspondant aux observations
     """
     df['cluster'] = cluster
@@ -345,16 +345,18 @@ def preprocess(text):
 
     return ' '.join(a_lemmas)
 
+
 def find_persons(text):
     # Create Doc object
     nlp = en_core_web_sm.load()
     doc = nlp(text)
-    
+
     # Identify the persons
     persons = [ent.text for ent in doc.ents if ent.label_ == 'PERSON']
-    
+
     # Return persons
     return persons
+
 
 def strip_html_tags(text):
     """remove html tags from text"""
@@ -362,10 +364,12 @@ def strip_html_tags(text):
     stripped_text = soup.get_text(separator=" ")
     return stripped_text
 
+
 def remove_accented_chars(text):
     """remove accented characters from text, e.g. café"""
     text = unidecode.unidecode(text)
     return text
+
 
 def extract_preformattext_imageurl(text):
     """remove preformat text and image bloc"""
@@ -377,17 +381,20 @@ def extract_preformattext_imageurl(text):
     p_text = soup.get_text(separator=" ")
     return p_text
 
+
 def token_text(text):
     nlp = en_core_web_sm.load()
     doc = nlp(text)
     tokens = [token.text for token in doc]
     return tokens
 
+
 def remove_stopwords_PRON(text):
     nlp = en_core_web_sm.load()
     doc = nlp(text)
     stopwords = spacy.lang.en.stop_words.STOP_WORDS
     lemmas = [token.lemma_ for token in doc]
-    a_lemmas = [lemma for lemma in lemmas if lemma.isalpha() and lemma not in stopwords]
+    a_lemmas = [lemma for lemma in lemmas
+                if lemma.isalpha() and lemma not in stopwords]
     text_lemma = ' '.join(a_lemmas)
     return text_lemma
