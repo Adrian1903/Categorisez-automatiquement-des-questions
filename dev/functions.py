@@ -12,7 +12,19 @@ from IPython.display import Image
 from bs4 import BeautifulSoup
 import unidecode
 import en_core_web_sm
+
 import spacy
+
+# For multiclass classification
+from sklearn.multiclass import OneVsRestClassifier
+
+# Models
+from sklearn.linear_model import LogisticRegression
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import MultinomialNB
+
+nlp = en_core_web_sm.load()
 
 
 def display_circles(pcs, n_comp, pca,
@@ -326,7 +338,7 @@ def affect_cluster_name(df, cluster, dict):
 
 
 # Function to preprocess text
-def preprocess(text):
+def preprocess(text, model=nlp):
     """[summary]
 
     Args:
@@ -336,7 +348,7 @@ def preprocess(text):
         [type]: [description]
     """
     # Create Doc object
-    doc = nlp(text, disable=['ner', 'parser'])
+    doc = model(text, disable=['ner', 'parser'])
     # Generate lemmas
     lemmas = [token.lemma_ for token in doc]
     # Remove stopwords and non-alphabetic characters
@@ -346,11 +358,9 @@ def preprocess(text):
     return ' '.join(a_lemmas)
 
 
-def find_persons(text):
+def find_persons(text, model=nlp):
     # Create Doc object
-    nlp = en_core_web_sm.load()
-    doc = nlp(text)
-
+    doc = model(text)
     # Identify the persons
     persons = [ent.text for ent in doc.ents if ent.label_ == 'PERSON']
 
@@ -382,19 +392,29 @@ def extract_preformattext_imageurl(text):
     return p_text
 
 
-def token_text(text):
-    nlp = en_core_web_sm.load()
-    doc = nlp(text)
+def token_text(text, model=nlp):
+    doc = model(text)
     tokens = [token.text for token in doc]
     return tokens
 
 
-def remove_stopwords_PRON(text):
-    nlp = en_core_web_sm.load()
-    doc = nlp(text)
+def remove_stopwords_PRON(text, model=nlp):
+    doc = model(text)
     stopwords = spacy.lang.en.stop_words.STOP_WORDS
     lemmas = [token.lemma_ for token in doc]
     a_lemmas = [lemma for lemma in lemmas
                 if lemma.isalpha() and lemma not in stopwords]
     text_lemma = ' '.join(a_lemmas)
     return text_lemma
+
+
+def remove_verbs_adj(text, model=nlp):
+    # Create doc object
+    doc = model(text)
+    # Generate list of POS tags
+    txt = [token.text for token in doc
+           if (token.pos_ != 'VERB')
+           and (token.pos_ != 'ADJ')]
+
+    txt = ' '.join(txt)
+    return txt
