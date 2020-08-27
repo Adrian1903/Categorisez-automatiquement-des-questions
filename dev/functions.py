@@ -398,23 +398,25 @@ def token_text(text, model=nlp):
     return tokens
 
 
-def remove_stopwords_PRON(text, model=nlp):
+def remove_stopwords_PRON(text, model=nlp, protect=[]):
     doc = model(text)
     stopwords = spacy.lang.en.stop_words.STOP_WORDS
     lemmas = [token.lemma_ for token in doc]
     a_lemmas = [lemma for lemma in lemmas
-                if lemma.isalpha() and lemma not in stopwords]
+                if lemma not in stopwords and
+                (lemma.isalpha() or lemma in protect)]
     text_lemma = ' '.join(a_lemmas)
     return text_lemma
 
 
-def remove_verbs_adj(text, model=nlp):
+def remove_verbs_adj(text, model=nlp, protect=[]):
     # Create doc object
     doc = model(text)
     # Generate list of POS tags
     txt = [token.text for token in doc
            if (token.pos_ != 'VERB')
-           and (token.pos_ != 'ADJ')]
+           and (token.pos_ != 'ADJ')
+           or token.text in protect]
 
     txt = ' '.join(txt)
     return txt
