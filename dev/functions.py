@@ -12,8 +12,11 @@ from IPython.display import Image
 from bs4 import BeautifulSoup
 import unidecode
 import en_core_web_sm
-
+import re
 import spacy
+from spacy.tokens import Doc
+from spacy.language import Language
+from spacy.lang.en.stop_words import STOP_WORDS
 
 # For multiclass classification
 from sklearn.multiclass import OneVsRestClassifier
@@ -24,7 +27,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
 
-nlp = en_core_web_sm.load()
+nlp = spacy.load('en_core_web_sm', disable=['ner'])
 
 
 def display_circles(pcs, n_comp, pca,
@@ -368,55 +371,177 @@ def find_persons(text, model=nlp):
     return persons
 
 
-def strip_html_tags(text):
-    """remove html tags from text"""
-    soup = BeautifulSoup(text, "html.parser")
-    stripped_text = soup.get_text(separator=" ")
-    return stripped_text
-
-
-def remove_accented_chars(text):
-    """remove accented characters from text, e.g. café"""
-    text = unidecode.unidecode(text)
-    return text
-
-
-def extract_preformattext_imageurl(text):
+def clean_before_tagger(text):
     """remove preformat text and image bloc"""
+    # J'enlève les caractères accentuées
+    text = unidecode.unidecode(text)
+
+    # Je supprime les blocs de code et image
     soup = BeautifulSoup(text, "html.parser")
     for p in soup.select('pre'):
         p.extract()
     for i in soup.select('a'):
         i.extract()
-    p_text = soup.get_text(separator=" ")
-    return p_text
+
+    # Je renvoie le texte sans balise HTML
+    # sans retour ligne, et avec le texte en minuscule
+    return soup.get_text().replace('\n', '').lower()
 
 
-def token_text(text, model=nlp):
-    doc = model(text)
+def token_text(text):
+    doc = nlp.make_doc(text)
     tokens = [token.text for token in doc]
     return tokens
 
 
-def remove_stopwords_PRON(text, model=nlp, protect=[]):
-    doc = model(text)
-    stopwords = spacy.lang.en.stop_words.STOP_WORDS
-    lemmas = [token.lemma_ for token in doc]
-    a_lemmas = [lemma for lemma in lemmas
-                if lemma not in stopwords and
-                (lemma.isalpha() or lemma in protect)]
-    text_lemma = ' '.join(a_lemmas)
-    return text_lemma
+def expand_contractions(text):
+    # https://en.wikipedia.org/wiki/Wikipedia:List_of_English_contractions
+
+    flags = re.IGNORECASE | re.MULTILINE
+
+    text = re.sub(r'`', "'", text, flags=flags)
+
+    # starts / ends with '
+    text = re.sub(
+        r"(\s|^)'(aight|cause)(\s|$)", r'\g<1>\g<2>\g<3>',
+        text, flags=flags
+    )
+
+    text = re.sub(
+        r"(\s|^)'t(was|is)(\s|$)", r'\g<1>it \g<2>\g<3>',
+        text, flags=flags
+    )
+
+    text = re.sub(
+        r"(\s|^)ol'(\s|$)", r'\g<1>old\g<2>',
+        text, flags=flags
+    )
+
+    # expand words without '
+    text = re.sub(r"\b(aight)\b", 'alright', text, flags=flags)
+    text = re.sub(r'\bcause\b', 'because', text, flags=flags)
+    text = re.sub(r'\b(finna|gonna)\b', 'going to', text, flags=flags)
+    text = re.sub(r'\bgimme\b', 'give me', text, flags=flags)
+    text = re.sub(r"\bgive'n\b", 'given', text, flags=flags)
+    text = re.sub(r"\bhowdy\b", 'how do you do', text, flags=flags)
+    text = re.sub(r"\bgotta\b", 'got to', text, flags=flags)
+    text = re.sub(r"\binnit\b", 'is it not', text, flags=flags)
+    text = re.sub(r"\b(can)(not)\b", r'\g<1> \g<2>', text, flags=flags)
+    text = re.sub(r"\bwanna\b", 'want to', text, flags=flags)
+    text = re.sub(r"\bmethinks\b", 'me thinks', text, flags=flags)
+
+    # one offs,
+    text = re.sub(r"\bo'er\b", r'over', text, flags=flags)
+    text = re.sub(r"\bne'er\b", r'never', text, flags=flags)
+    text = re.sub(r"\bo'?clock\b", 'of the clock', text, flags=flags)
+    text = re.sub(r"\bma'am\b", 'madam', text, flags=flags)
+    text = re.sub(r"\bgiv'n\b", 'given', text, flags=flags)
+    text = re.sub(r"\be'er\b", 'ever', text, flags=flags)
+    text = re.sub(r"\bd'ye\b", 'do you', text, flags=flags)
+    text = re.sub(r"\be'er\b", 'ever', text, flags=flags)
+    text = re.sub(r"\bd'ye\b", 'do you', text, flags=flags)
+    text = re.sub(r"\bg'?day\b", 'good day', text, flags=flags)
+    text = re.sub(r"\b(ain|amn)'?t\b", 'am not', text, flags=flags)
+    text = re.sub(r"\b(are|can)'?t\b", r'\g<1> not', text, flags=flags)
+    text = re.sub(r"\b(let)'?s\b", r'\g<1> us', text, flags=flags)
+
+    # major expansions involving smaller,
+    text = re.sub(r"\by'all'dn't've'd\b",
+                  'you all would not have had',
+                  text, flags=flags)
+    text = re.sub(r"\by'all're\b", 'you all are', text, flags=flags)
+    text = re.sub(r"\by'all'd've\b", 'you all would have', text, flags=flags)
+    text = re.sub(r"(\s)y'all(\s)", r'\g<1>you all\g<2>', text, flags=flags)
+
+    # minor,
+    text = re.sub(r"\b(won)'?t\b", 'will not', text, flags=flags)
+    text = re.sub(r"\bhe'd\b", 'he had', text, flags=flags)
+
+    # major,
+    text = re.sub(r"\b(I|we|who)'?d'?ve\b", r'\g<1> would have',
+                  text, flags=flags)
+    text = re.sub(r"\b(could|would|must|should|would)n'?t'?ve\b",
+                  r'\g<1> not have', text, flags=flags)
+    text = re.sub(r"\b(he)'?dn'?t'?ve'?d\b", r'\g<1> would not have had',
+                  text, flags=flags)
+    text = re.sub(r"\b(daren|daresn|dasn)'?t", 'dare not', text, flags=flags)
+    text = re.sub(r"\b(he|how|i|it|she|that|there|these|they|we|what|where|\
+                  which|who|you)'?ll\b", r'\g<1> will', text, flags=flags)
+    text = re.sub(r"\b(everybody|everyone|he|how|it|she|somebody|someone|\
+                  something|that|there|this|what|when|where|which|who|why)\
+                  '?s\b", r'\g<1> is', text, flags=flags)
+    text = re.sub(r"\b(I)'?m'a\b", r'\g<1> am about to', text, flags=flags)
+    text = re.sub(r"\b(I)'?m'o\b", r'\g<1> am going to', text, flags=flags)
+    text = re.sub(r"\b(I)'?m\b", r'\g<1> am', text, flags=flags)
+    text = re.sub(r"\bshan't\b", 'shall not', text, flags=flags)
+    text = re.sub(r"\b(are|could|did|does|do|go|had|has|have|is|may|might|\
+                  must|need|ought|shall|should|was|were|would)n'?t\b",
+                  r'\g<1> not', text, flags=flags)
+    text = re.sub(r"\b(could|had|he|i|may|might|must|should|these|they|\
+                  those|to|we|what|where|which|who|would|you)'?ve\b",
+                  r'\g<1> have', text, flags=flags)
+    text = re.sub(r"\b(how|so|that|there|these|they|those|we|what|where|\
+                  which|who|why|you)'?re\b", r'\g<1> are',
+                  text, flags=flags)
+    text = re.sub(r"\b(I|it|she|that|there|they|we|which|you)'?d\b",
+                  r'\g<1> had', text, flags=flags)
+    text = re.sub(r"\b(how|what|where|who|why)'?d\b", r'\g<1> did',
+                  text, flags=flags)
+
+    return text
 
 
-def remove_verbs_adj(text, model=nlp, protect=[]):
-    # Create doc object
-    doc = model(text)
-    # Generate list of POS tags
-    txt = [token.text for token in doc
-           if (token.pos_ != 'VERB')
-           and (token.pos_ != 'ADJ')
-           or token.text in protect]
+def clean_after_parser(text, protect=[]):
+    doc = nlp(text)
+    txt = [token.lemma_ for token in doc
+           if ((token.dep_ == 'ROOT' or
+                token.pos_ == 'NOUN' or
+                token.pos_ == 'ADJ' or
+                token.pos_ == 'ADV') and
+               token.text not in STOP_WORDS) or
+           token.text in protect]
 
-    txt = ' '.join(txt)
-    return txt
+    return ' '.join(txt)
+
+
+class Contractions_Component(object):
+    name = "contractions"
+
+    nlp: Language
+
+    def __init__(self, nlp: Language):
+        self.nlp = nlp
+
+    def __call__(self, doc: Doc) -> Doc:
+        text = doc.text
+        return self.nlp.make_doc(expand_contractions(text))
+
+
+class Clean_Before_Tagger_Component(object):
+    name = "clean_before_tagger"
+
+    nlp: Language
+
+    def __init__(self, nlp: Language):
+        self.nlp = nlp
+
+    def __call__(self, doc: Doc) -> Doc:
+        text = doc.text
+        return self.nlp.make_doc(clean_before_tagger(text))
+
+
+class Clean_After_Parser_Component(object):
+    name = "clean_after_parser"
+
+    nlp: Language
+
+    def __init__(self, nlp: Language):
+        self.nlp = nlp
+
+    def set_protect(self, bag):
+        self.bag_tags_lst = bag
+
+    def __call__(self, doc: Doc) -> Doc:
+        text = doc.text
+        return self.nlp.make_doc(
+            clean_after_parser(text, protect=self.bag_tags_lst))
