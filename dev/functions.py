@@ -17,6 +17,7 @@ import spacy
 from spacy.tokens import Doc
 from spacy.language import Language
 from spacy.lang.en.stop_words import STOP_WORDS
+from nltk.stem.porter import *
 
 # For multiclass classification
 from sklearn.multiclass import OneVsRestClassifier
@@ -501,11 +502,15 @@ def clean_after_parser(text, protect=[]):
                token.text not in STOP_WORDS) or
            token.text in protect]
 
+    # Attention aux mots qui peuvent être transformé en tags !!!
+    # stemmer = PorterStemmer()
+    # clean = [stemmer.stem(t) for t in txt]
+
     return ' '.join(txt)
 
 
-class Contractions_Component(object):
-    name = "contractions"
+class ContractionsComponent(object):
+    name = "Contractions"
 
     nlp: Language
 
@@ -517,8 +522,8 @@ class Contractions_Component(object):
         return self.nlp.make_doc(expand_contractions(text))
 
 
-class Clean_Before_Tagger_Component(object):
-    name = "clean_before_tagger"
+class CleanBeforeTaggerComponent(object):
+    name = "CleanBeforeTagger"
 
     nlp: Language
 
@@ -530,8 +535,8 @@ class Clean_Before_Tagger_Component(object):
         return self.nlp.make_doc(clean_before_tagger(text))
 
 
-class Clean_After_Parser_Component(object):
-    name = "clean_after_parser"
+class CleanAfterParserComponent(object):
+    name = "CleanAfterParser"
 
     nlp: Language
 
