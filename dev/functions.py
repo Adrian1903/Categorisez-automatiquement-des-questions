@@ -550,3 +550,106 @@ class CleanAfterParserComponent(object):
         text = doc.text
         return self.nlp.make_doc(
             clean_after_parser(text, protect=self.bag_tags_lst))
+
+
+def get_doc_topic(model, corpus, model_out):
+    topicnames = ['Topic_#' + str(i) for i in range(model.n_components)]
+    # docnames = ['Doc_#' + str(i) for i in range(len(corpus))]
+    docnames = corpus.index
+
+    df = pd.DataFrame(np.round(model_out, 2),
+                      columns=topicnames,
+                      index=docnames)
+    return df
+
+
+def show_topics(vectorizer, lda_model, n_words=20):
+    keywords = np.array(vectorizer.get_feature_names())
+    topic_keywords = []
+    for topic_weights in lda_model.components_:
+        top_keyword_locs = (-topic_weights).argsort()[:n_words]
+        topic_keywords.append(keywords.take(top_keyword_locs))
+    return topic_keywords
+
+
+def get_pred_tag(doc_topic,
+                 topic_keywords,
+                 corpus,
+                 n_tags=5,
+                 threshold=0.09):
+    """Récupère les tags prédits issue de l'analyse non supervisé
+
+    Args:
+        doc_topic (Dataframe): Document avec sujets dominants
+        topic_keywords (Dataframe): Sujets avec mots-clés dominants
+        corpus (Dataframe): Corpus de texte
+        threshold (float, optional): Seuil de réglage afin que les sujets trop
+        faible ne soit pas pris en compte.
+        Peut générer des tags supplémentaires.
+        Defaults to 0.09.
+
+    Returns:
+        [type]: [description]
+    """
+    eval = {}
+    for doc in range(len(corpus)):
+        # DOC_TOPIC
+        # Je pondère le poids de chaque topic dans chaque document
+        filter = doc_topic.loc[doc] > threshold
+        value = doc_topic.loc[doc][filter].reset_index()
+        value.columns = ['topic', 'value']
+        lst_topic = value.topic.to_list()
+
+        # Je calcule le nombre de mots à prendre dans chaque topic
+        nword = value.value / sum(value.value.to_list()) * n_tags
+        value['n_words'] = round(nword, 0).astype(int)
+
+        diff_words = n_tags - value.n_words.sum()
+        # Si j'ai moins de 5 tags, j'en rajoute là où la valeur est plus forte
+        if diff_words > 0:
+            index = value.sort_values(by='value').tail(1).reset_index()
+            index = index.at[0, 'index']
+            cond = value.index == index
+            value.n_words[cond] = value.n_words[cond] + diff_words
+
+        # Si j'ai plus de 5 tags, j'en supprimme la où la valeur
+        # est plus faible
+        elif diff_words < 0:
+            index = value.sort_values(by='value').head(abs(diff_words))
+            index = index.reset_index().loc[0:abs(diff_words) - 1, 'index']
+            index = index.to_list()
+
+            for i in index:
+                cond = value.index == i
+                value.n_words[cond] = value.n_words[cond] - 1
+        # Je visualise le nombre de mots à récupérer dans chaque topic
+        # display(value)
+
+        # Je visualise les mots associés à chaque topic
+        # display(topic_keywords.loc[lst_topic])
+
+        # TOPIC_KEYWORD
+        # Je sélectionne les tags en fonction de la pondération.
+        # Je fais attention à ne pas ajouter 2 fois le même tag
+        # car 1 mot peut être présent dans plusieurs topics
+        lst = []
+        for t in value.topic:
+            # Je définis le nombre de mots que je dois aller chercher
+            lst_word = np.arange(0, value[value.topic == t].n_words.item())
+            for w in lst_word:
+                tag = topic_keywords.at[t, 'Word ' + str(w)]
+                # Si le tag a déjà été inséré dans la liste,
+                # je prends le suivant
+                if tag in lst:
+                    tag = topic_keywords.at[t, 'Word ' + str(w + 1)]
+
+                # J'ajoute le tag à la liste
+                lst.append(tag)
+
+        eval[doc] = lst
+
+    pred_tag = pd.DataFrame.from_dict(eval, orient='index')
+    pred_tag['pred_tag'] = (pred_tag[0] + ',' + pred_tag[1] + ',' + pred_tag[2]
+                            + ',' + pred_tag[3] + ',' + pred_tag[4])
+    pred_tag = pred_tag.drop(columns=[0, 1, 2, 3, 4])
+    return pred_tag
