@@ -653,3 +653,11 @@ def get_pred_tag(doc_topic,
                             + ',' + pred_tag[3] + ',' + pred_tag[4])
     pred_tag = pred_tag.drop(columns=[0, 1, 2, 3, 4])
     return pred_tag
+
+
+def transform_tuple(tup):
+    i = 0
+    for sub in tup:
+        tup[i] = ','.join(sub)
+        i += 1
+    return tup
