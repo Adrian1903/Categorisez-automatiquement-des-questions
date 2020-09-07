@@ -572,11 +572,11 @@ def show_topics(vectorizer, lda_model, n_words=20):
     return topic_keywords
 
 
-def get_pred_tag(doc_topic,
-                 topic_keywords,
-                 corpus,
-                 n_tags=5,
-                 threshold=0.09):
+def get_unsupervised_tag(doc_topic,
+                         topic_keywords,
+                         corpus,
+                         n_tags=5,
+                         threshold=0.09):
     """Récupère les tags prédits issue de l'analyse non supervisé
 
     Args:
@@ -649,8 +649,10 @@ def get_pred_tag(doc_topic,
         eval[doc] = lst
 
     pred_tag = pd.DataFrame.from_dict(eval, orient='index')
-    pred_tag['pred_tag'] = (pred_tag[0] + ',' + pred_tag[1] + ',' + pred_tag[2]
-                            + ',' + pred_tag[3] + ',' + pred_tag[4])
+    pred_tag['unsupervised_tag'] = (pred_tag[0] + ',' + pred_tag[1] + ','
+                                    + pred_tag[2] + ',' + pred_tag[3] + ','
+                                    + pred_tag[4])
+
     pred_tag = pred_tag.drop(columns=[0, 1, 2, 3, 4])
     return pred_tag
 
@@ -661,3 +663,21 @@ def transform_tuple(tup):
         tup[i] = ','.join(sub)
         i += 1
     return tup
+
+
+def get_jaccard_sim(str1, str2):
+    a = set(str1)
+    b = set(str2)
+    c = a.intersection(b)
+    return len(c) / (len(a) + len(b) - len(c))
+
+
+def get_jaccard_score(df1, df2):
+    origin = df1.str.split(',')
+    pred = df2.str.split(',')
+    res = pd.DataFrame(index=lst_index, columns=['jaccard_score'])
+    for i in lst_index:
+        res.at[i, 'jaccard_score'] = get_jaccard_sim(origin.loc[i],
+                                                     pred.loc[i])
+
+    return int(round(res.mean() * 100, 1))
