@@ -672,12 +672,60 @@ def get_jaccard_sim(str1, str2):
     return len(c) / (len(a) + len(b) - len(c))
 
 
-def get_jaccard_score(df1, df2):
+def get_jaccard_score(df1, df2, index):
     origin = df1.str.split(',')
     pred = df2.str.split(',')
-    res = pd.DataFrame(index=lst_index, columns=['jaccard_score'])
+    res = pd.DataFrame(index=index, columns=['jaccard_score'])
     for i in lst_index:
         res.at[i, 'jaccard_score'] = get_jaccard_sim(origin.loc[i],
                                                      pred.loc[i])
 
     return int(round(res.mean() * 100, 1))
+
+
+def exec_time(start, end):
+    diff_time = end - start
+    m, s = divmod(diff_time, 60)
+    h, m = divmod(m, 60)
+    s, m, h = int(round(s, 0)), int(round(m, 0)), int(round(h, 0))
+    duration = "{0:02d}:{1:02d}:{2:02d}".format(h, m, s)
+    return duration
+
+
+def evaluate_classifier(X_train, X_test, y_train, y_test, classifiers, cv=5, scoring='jaccard_weighted', target_name='models'):
+    results = pd.DataFrame()
+    for class_name, class_, class_params in classifiers:
+        print(f"{class_name} en cours d'exécution...")
+        class_ = OneVsRestClassifier(class_)
+        model = GridSearchCV(class_, param_grid=class_params, cv=cv, scoring=scoring, n_jobs=4)
+        model.fit(X_train, y_train)
+
+        # Je stocke les résultats du GridSearchCV dans un dataframe
+        model_results_df = pd.DataFrame(model.cv_results_)
+
+        # Je sélectionne la meilleure observation
+        model_results_df = model_results_df[model_results_df["rank_test_score"] == 1]
+
+        # Prediction
+        start = time.time()
+        y_pred = model.predict(X_test)
+        end = time.time()
+        model_results_df['Prediction duration'] = exec_time(start, end)
+
+        # J'ajoute le nom du modéle et les résultats sur les données de test
+        model_results_df[target_name] = class_name
+        model_results_df['Test : Jaccard'] = round(jaccard_score(y_test, y_pred, average='weighted'), 3)
+
+
+        # Les hyperparamètres des classifieurs étant changeant, je crée un nouveau dataframe à partir de la colonne params 
+        # des résultats. Je jointe les 2 dataframes à partir des index. Cela me permet des flexible pour mon dataframe.
+        model_results_df = pd.merge(model_results_df[[target_name, 'Test : Jaccard', 'mean_test_score', 'Prediction duration', 'mean_fit_time']], 
+                                 pd.DataFrame(model.cv_results_['params']), 
+                                 left_index=True, right_index=True)
+        
+        col = ['mean_test_score', 'mean_score_time']
+        model_results_df[col] = round(model_results_df[col], 2)
+        # Je stocke les résultats dans un nouveau dataframe.
+        results = results.append(model_results_df)
+    
+    export_png_table(results, filename='img/img_results_' + target_name + '.png')
