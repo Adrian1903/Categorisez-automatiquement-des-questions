@@ -8,3 +8,4 @@ __pycache__
 *.gdoc
 test.ipynb
 img
+*.sav
