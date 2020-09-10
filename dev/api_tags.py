@@ -189,26 +189,6 @@ class CleanAfterParserComponent(object):
             clean_after_parser(text, protect=self.bag_tags_lst))
 
 
-def get_doc_topic(model, corpus, model_out):
-    topicnames = ['Topic_#' + str(i) for i in range(model.n_components)]
-    # docnames = ['Doc_#' + str(i) for i in range(len(corpus))]
-    docnames = corpus.index
-
-    df = pd.DataFrame(np.round(model_out, 2),
-                      columns=topicnames,
-                      index=docnames)
-    return df
-
-
-def show_topics(vectorizer, lda_model, n_words=20):
-    keywords = np.array(vectorizer.get_feature_names())
-    topic_keywords = []
-    for topic_weights in lda_model.components_:
-        top_keyword_locs = (-topic_weights).argsort()[:n_words]
-        topic_keywords.append(keywords.take(top_keyword_locs))
-    return topic_keywords
-
-
 def get_unsupervised_tag(doc_topic,
                          topic_keywords,
                          corpus,
@@ -300,3 +280,22 @@ def transform_tuple(tup):
         tup[i] = ','.join(sub)
         i += 1
     return tup
+
+
+def supervised_tags(cleaned_text, vectorizer, binarizer, supervised_model):
+    tfidf_cleaned_text = vectorizer.transform([cleaned_text])
+    pred = supervised_model.predict_proba(tfidf_cleaned_text)
+    pred = pd.DataFrame(pred).applymap(lambda x: 1 if x > 0.11 else 0)
+    pred = pred.to_numpy()
+    return transform_tuple(binarizer.inverse_transform(pred))
+
+
+def unsupervised_tags(cleaned_text, vectorizer,
+                      df_topic_keywords, unsupervised_model):
+    vect_cleaned_text = vectorizer.transform([cleaned_text])
+    out = unsupervised_model.transform(vect_cleaned_text)
+    doc_topic = round(pd.DataFrame(out), 2)
+    df_tags = get_unsupervised_tag(doc_topic,
+                                   df_topic_keywords,
+                                   [cleaned_text])
+    return df_tags.unsupervised_tag.to_list()
