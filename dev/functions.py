@@ -18,6 +18,7 @@ from spacy.tokens import Doc
 from spacy.language import Language
 from spacy.lang.en.stop_words import STOP_WORDS
 from nltk.stem.porter import *
+from sklearn.metrics import jaccard_score
 
 # For multiclass classification
 from sklearn.multiclass import OneVsRestClassifier
@@ -724,7 +725,7 @@ def evaluate_classifier(X_train, X_test, y_train, y_test, classifiers, cv=5,
                                     pd.DataFrame(model.cv_results_['params']),
                                     left_index=True, right_index=True)
 
-        col = ['mean_test_score', 'mean_score_time']
+        col = ['mean_test_score', 'mean_fit_time']
         model_results_df[col] = round(model_results_df[col], 2)
         # Je stocke les résultats dans un nouveau dataframe.
         results = results.append(model_results_df)
