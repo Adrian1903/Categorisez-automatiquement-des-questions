@@ -1,0 +1,58 @@
+header {
+    color: #7451eb;
+    font-family: 'Montserrat';
+    text-align: center;
+}
+
+body{
+    font-family: 'Open Sans';
+    text-align: center;
+}
+
+form {
+    /* Uniquement centrer le formulaire sur la page */
+    margin: 0 auto;
+    width: 800px;
+    /* Encadré pour voir les limites du formulaire */
+    padding: 1em;
+    border: 1px solid #CCC;
+    border-radius: 1em;
+}
+
+textarea{
+    width: 800px;
+    height: 100px;
+}
+
+.bt{
+    font-family: 'Montserrat';
+    font-size: 16px;
+    color: #7451eb;
+    border: 1px solid #7451eb;
+    border-radius: 1em;
+    padding: 15px 32px;
+    transition-duration: 0.4s;
+    margin: 15px;
+}
+
+.bt:hover {
+    color: white;
+    background-color: #7451eb; 
+  }
+
+.tag{
+    font-family: 'Montserrat';
+    font-size: 20px;
+    color: #6a6969;
+    border: 1px solid #F48024;
+    border-radius: 1em;
+    padding: 15px 32px;
+    transition-duration: 0.4s;
+    margin-top: 20px;
+}
+
+.tag:hover {
+    color: white;
+    background-color: #F48024; 
+  }
+

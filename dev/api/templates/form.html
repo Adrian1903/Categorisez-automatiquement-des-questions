@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Suggestions de tags - Stackoverflow</title>
+
+  <script src="/static/tagger.js"></script>
+
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+
+<body>
+
+  <div class="content">
+    <header>
+      <img src="/static/stack_logo.png" alt="Stackoverflow" width="200" height="53">
+      <h1>
+        Suggestions de tags
+      </h1>
+
+    </header>
+  </div>
+  <div id="form">
+    <form action="/tags" method="post">
+      <div>
+        <textarea id="question" name="user_question" placeholder="Saisir votre question..."
+          required="required">{{question}}</textarea>
+      </div>
+      <div class="button">
+        <button class="bt" type="submit">Envoyer</button>
+      </div>
+    </form>
+  </div>
+
+
+
+  <div>
+    <button class='tag'>{{ sup[0] }}</button>
+    <button class='tag'>{{ sup[1] }}</button>
+    <button class='tag'>{{ sup[2] }}</button>
+    <button class='tag'>{{ sup[3] }}</button>
+    <button class='tag'>{{ sup[4] }}</button>
+  </div>
+  <div>
+    <button class='tag'>{{ unsup[0] }}</button>
+    <button class='tag'>{{ unsup[1] }}</button>
+    <button class='tag'>{{ unsup[2] }}</button>
+    <button class='tag'>{{ unsup[3] }}</button>
+    <button class='tag'>{{ unsup[4] }}</button>
+  </div>
+
+</body>
+
+</html>
