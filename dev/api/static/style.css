@@ -7,7 +7,9 @@ header {
 body{
     font-family: 'Open Sans';
     text-align: center;
+    background-color: #fafafa;
 }
+
 
 form {
     /* Uniquement centrer le formulaire sur la page */
@@ -28,6 +30,7 @@ textarea{
     font-family: 'Montserrat';
     font-size: 16px;
     color: #7451eb;
+    background-color: #fafafa;
     border: 1px solid #7451eb;
     border-radius: 1em;
     padding: 15px 32px;
@@ -40,19 +43,34 @@ textarea{
     background-color: #7451eb; 
   }
 
-.tag{
+.bt_tag{
     font-family: 'Montserrat';
     font-size: 20px;
+    font-weight: bold;
     color: #6a6969;
+    background-color: #fafafa;
     border: 1px solid #F48024;
     border-radius: 1em;
     padding: 15px 32px;
     transition-duration: 0.4s;
-    margin-top: 20px;
+    margin: 5px;
 }
 
-.tag:hover {
+.bt_tag:hover {
     color: white;
     background-color: #F48024; 
   }
 
+.bt_notag{
+    font-family: 'Montserrat';
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration:line-through;
+    color: #6a6969;
+    background-color: #d8d8d8;
+    border: 1px solid #363636;
+    border-radius: 1em;
+    padding: 15px 32px;
+    transition-duration: 0.4s;
+    margin: 5px;
+}

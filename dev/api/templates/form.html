@@ -3,22 +3,23 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Suggestions de tags - Stackoverflow</title>
+  <title>Tags suggestion - Stackoverflow</title>
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="/static/tagger.js"></script>
 
   <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
   <link rel="stylesheet" type="text/css" href="/static/style.css">
+  <link rel="shortcut icon" href="/static/img/favicon.ico">
 </head>
 
 <body>
-
   <div class="content">
     <header>
-      <img src="/static/stack_logo.png" alt="Stackoverflow" width="200" height="53">
+      <img src="/static/img/stack_logo.png" alt="Stackoverflow" width="200" height="53">
       <h1>
-        Suggestions de tags
+        Tags suggestion
       </h1>
 
     </header>
@@ -26,31 +27,60 @@
   <div id="form">
     <form action="/tags" method="post">
       <div>
-        <textarea id="question" name="user_question" placeholder="Saisir votre question..."
+        <textarea id="question" name="user_question" placeholder="Type your question..."
           required="required">{{question}}</textarea>
       </div>
       <div class="button">
-        <button class="bt" type="submit">Envoyer</button>
+        <button class="bt" type="submit">Get tags</button>
       </div>
     </form>
   </div>
 
+  <div class="space_tag">
+    <script>
+      function tagger(lst, id, style) {
+        lst.forEach(element => {
+          var newBut = document.createElement("button");
+          var newButContent = document.createTextNode(element);
+          newBut.appendChild(newButContent);
+          newBut.setAttribute("class", style)
+
+          var currentDiv = document.getElementById(id);
+          document.body.insertBefore(newBut, currentDiv.nextSibling);
+        });
+      }
+
+      function H2(title, parent_id, id) {
+        var newH2 = document.createElement("h2");
+        var newH2Content = document.createTextNode(title);
+        newH2.appendChild(newH2Content);
+        newH2.setAttribute("id", id)
+
+        var currentDiv = document.getElementById(parent_id);
+        document.body.insertBefore(newH2, currentDiv.nextSibling);
+
+      }
 
 
-  <div>
-    <button class='tag'>{{ sup[0] }}</button>
-    <button class='tag'>{{ sup[1] }}</button>
-    <button class='tag'>{{ sup[2] }}</button>
-    <button class='tag'>{{ sup[3] }}</button>
-    <button class='tag'>{{ sup[4] }}</button>
+      if ('{{unsup}}') {
+
+
+        var sup_tag = '{{sup}}'.split(',')
+        var unsup_tag = '{{unsup}}'.split(',')
+
+        H2("Supervised tags", "form", "sup")
+        H2("Unsupervised tags", "sup", "unsup")
+        if ('{{sup}}') {
+          tagger(sup_tag, "sup", "bt_tag")
+        }  else {tagger(["no supervised tag"], "sup", "bt_notag")}
+        tagger(unsup_tag, "unsup", "bt_tag")
+      }
+
+
+    </script>
   </div>
-  <div>
-    <button class='tag'>{{ unsup[0] }}</button>
-    <button class='tag'>{{ unsup[1] }}</button>
-    <button class='tag'>{{ unsup[2] }}</button>
-    <button class='tag'>{{ unsup[3] }}</button>
-    <button class='tag'>{{ unsup[4] }}</button>
-  </div>
+
+
 
 </body>
 

@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn.model_selection import GridSearchCV
 from bs4 import BeautifulSoup
 import unidecode
-import en_core_web_sm
 import re
 import spacy
 from spacy.tokens import Doc
@@ -298,4 +297,4 @@ def unsupervised_tags(cleaned_text, vectorizer,
     df_tags = get_unsupervised_tag(doc_topic,
                                    df_topic_keywords,
                                    [cleaned_text])
-    return df_tags.unsupervised_tag
+    return df_tags.unsupervised_tag.to_list()

@@ -1,0 +1,9 @@
+flask
+pandas
+spacy
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
+gunicorn
+sklearn
+bs4
+unidecode
+regex==2020.7.14
