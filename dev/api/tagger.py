@@ -26,6 +26,7 @@ tfidf_vectorizer = pickle.load(open('src/tfidf_vectorizer.sav', 'rb'))
 binarizer = pickle.load(open('src/binarizer.sav', 'rb'))
 supervised_model = pickle.load(open('src/supervised_model.sav', 'rb'))
 
+
 @app.route('/')
 def home():
     return render_template('form.html')
