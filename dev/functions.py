@@ -490,6 +490,9 @@ def expand_contractions(text):
     text = re.sub(r"\b(how|what|where|who|why)'?d\b", r'\g<1> did',
                   text, flags=flags)
 
+    # Suppression des ponctutations sauf ceux protégés
+    text = re.sub(r'[^\w\s\.\+\#]', '', text)
+
     return text
 
 
@@ -510,8 +513,8 @@ def clean_after_parser(text, protect=[]):
     return ' '.join(txt)
 
 
-class ContractionsComponent(object):
-    name = "Contractions"
+class CleanContractionsPunctationsComponent(object):
+    name = "CleanContractionsPunctations"
 
     nlp: Language
 
