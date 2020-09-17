@@ -1,13 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8" />
   <title>Tags suggestions - Stackoverflow</title>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="/static/tagger.js"></script>
-
   <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
   <link rel="stylesheet" type="text/css" href="/static/style.css">
@@ -21,15 +16,16 @@
       <h1>
         Tags suggestions
       </h1>
-
     </header>
   </div>
+
   <div id="form">
     <form action="/tags" method="post">
       <div>
         <textarea id="question" name="user_question" placeholder="Type your question..."
           required="required">{{question}}</textarea>
       </div>
+
       <div class="button">
         <button class="bt" type="submit">Get tags</button>
       </div>
@@ -44,44 +40,35 @@
           var newButContent = document.createTextNode(element);
           newBut.appendChild(newButContent);
           newBut.setAttribute("class", style)
-
           var currentDiv = document.getElementById(id);
           document.body.insertBefore(newBut, currentDiv.nextSibling);
         });
       }
-
       function H2(title, parent_id, id) {
         var newH2 = document.createElement("h2");
         var newH2Content = document.createTextNode(title);
         newH2.appendChild(newH2Content);
         newH2.setAttribute("id", id)
-
         var currentDiv = document.getElementById(parent_id);
         document.body.insertBefore(newH2, currentDiv.nextSibling);
 
       }
 
-
       if ('{{unsup}}') {
-
-
         var sup_tag = '{{sup}}'.split(',')
         var unsup_tag = '{{unsup}}'.split(',')
 
         H2("Supervised tags", "form", "sup")
         H2("Unsupervised tags", "sup", "unsup")
+
         if ('{{sup}}') {
           tagger(sup_tag, "sup", "bt_tag")
-        }  else {tagger(["no supervised tag"], "sup", "bt_notag")}
+        } else { tagger(["no supervised tag"], "sup", "bt_notag") }
+        
         tagger(unsup_tag, "unsup", "bt_tag")
       }
 
-
     </script>
   </div>
-
-
-
 </body>
-
 </html>
