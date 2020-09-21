@@ -16,13 +16,13 @@ models_10k est déployé en production sur Heroku,
 models_50k est à déployer en local si vous souhaitez le tester.
 
 ## Installation en local
-1/ git clone https://github.com/Adrian1903/Categorisez-automatiquement-des-questions
-2/ Aller dans le dossier api du projet
-3/ Désarchiver le modèle à tester dans le dossier src (models_10k, models_50k)
-3/ Installer les composants requis dans "requirements.txt"
-4/ Dans tagger.py, ligne 11 à 14, choisir le seuil de probabilité adapté au modèle à tester (0.11 si 10k, 0.16 si 50k)   
-5/ Exécuter tagger.py   
-6/ Tester le modèle en se connectant à localhost   
+1. git clone https://github.com/Adrian1903/Categorisez-automatiquement-des-questions
+2. Aller dans le dossier api du projet
+3. Désarchiver le modèle à tester dans le dossier src (models_10k ou models_50k)
+4. Installer les composants requis dans "requirements.txt"
+5. Dans tagger.py, ligne 11 à 14, choisir le seuil de probabilité adapté au modèle à tester (0.11 si models_10k, 0.16 si models_50k)   
+6. Exécuter tagger.py   
+7. Tester le modèle en se connectant à [localhost](http://127.0.0.1:5000)   
 
 ## Support
 Je reste disponible pour plus d'informations
