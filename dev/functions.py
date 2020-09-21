@@ -217,7 +217,7 @@ def export_png_table(data, col_width=2.2, row_height=0.625, font_size=10,
 
     fig.savefig(filename, transparent=True)
     plt.close()
-    Image(filename)
+    display(Image(filename))
     return ax
 
 
