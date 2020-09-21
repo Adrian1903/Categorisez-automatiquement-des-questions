@@ -20,7 +20,7 @@ models_50k est à déployer en local si vous souhaitez le tester.
 2. Aller dans le dossier api du projet
 3. Désarchiver le modèle à tester dans le dossier src (models_10k ou models_50k)
 4. Installer les composants requis dans "requirements.txt"
-5. Dans tagger.py, ligne 11 à 14, choisir le seuil de probabilité adapté au modèle à tester (0.11 si models_10k, 0.16 si models_50k)   
+5. Dans tagger.py, ligne 11 à 14, choisir le seuil de probabilité adapté au modèle à tester (0.11 si models_10k, 0.15 si models_50k)   
 6. Exécuter tagger.py   
 7. Tester le modèle en se connectant à [localhost](http://127.0.0.1:5000)   
 
