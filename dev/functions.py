@@ -491,7 +491,7 @@ def expand_contractions(text):
                   text, flags=flags)
 
     # Suppression des ponctutations sauf ceux protégés
-    text = re.sub(r'[^\w\s\.\+\#]', '', text)
+    # text = re.sub(r'[^\w\s\.\+\#]', '', text)
 
     return text
 
@@ -513,8 +513,8 @@ def clean_after_parser(text, protect=[]):
     return ' '.join(txt)
 
 
-class CleanContractionsPunctationsComponent(object):
-    name = "CleanContractionsPunctations"
+class CleanContractionsComponent(object):
+    name = "CleanContractions"
 
     nlp: Language
 
@@ -616,7 +616,7 @@ def get_unsupervised_tag(doc_topic,
             cond = value.index == index
             value.n_words[cond] = value.n_words[cond] + diff_words
 
-        # Si j'ai plus de 5 tags, j'en supprimme la où la valeur
+        # Si j'ai plus de 5 tags, j'en supprime la où la valeur
         # est plus faible
         elif diff_words < 0:
             index = value.sort_values(by='value').head(abs(diff_words))
@@ -657,8 +657,7 @@ def get_unsupervised_tag(doc_topic,
                                     + pred_tag[2] + ',' + pred_tag[3] + ','
                                     + pred_tag[4])
 
-    pred_tag = pred_tag.drop(columns=[0, 1, 2, 3, 4])
-    return pred_tag
+    return pred_tag['unsupervised_tag']
 
 
 def transform_tuple(tup):
@@ -698,7 +697,7 @@ def evaluate_classifier(X_train, X_test, y_train, y_test, classifiers, cv=5,
         print(f"{class_name} en cours d'exécution...")
         class_ = OneVsRestClassifier(class_)
         model = GridSearchCV(class_, param_grid=class_params, cv=cv,
-                             scoring=scoring, n_jobs=4)
+                             scoring=scoring, n_jobs=-1)
         model.fit(X_train, y_train)
 
         # Je stocke les résultats du GridSearchCV dans un dataframe
