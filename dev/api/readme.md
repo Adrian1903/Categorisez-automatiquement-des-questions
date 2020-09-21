@@ -5,15 +5,24 @@ Suggère des tags pour une question posée sur le site de questions/réponses st
 https://tags-suggestions.herokuapp.com/
 
 ## Description
-L'API doit aider les utilisateurs débutants à insérer les bons tags à leur questions.
+L'API doit aider les utilisateurs débutants à insérer les bons tags à leurs questions.
 De ce fait, le programme prédira un certains nombre de mot-clés. Cela se fera de manière non supervisée et de manière supervisée selon une question donnée.
 
+# Choix du modèle de suggestion
+2 modèles de suggestion sont disponibles : 
+- models_10k ; entrainé sur 10 000 questions avec un score de Jaccard à 40%
+- models_50k ; entrainé sur 50 000 questions avec un score de Jaccard à 44%
+models_10k est déployé en production sur Heroku, 
+models_50k est à déployer en local si vous souhaitez le tester.
+
 ## Installation en local
-1/ git clone
-2/ Désarchiver les modèles
+1/ git clone https://github.com/Adrian1903/Categorisez-automatiquement-des-questions
+2/ Aller dans le dossier api du projet
+3/ Désarchiver le modèle à tester dans le dossier src (models_10k, models_50k)
 3/ Installer les composants requis dans "requirements.txt"
-3/ Exécuter tagger.py
-4/ Se connecter à localhost
+4/ Dans tagger.py, ligne 11 à 14, choisir le seuil de probabilité adapté au modèle à tester (0.11 si 10k, 0.16 si 50k)   
+5/ Exécuter tagger.py   
+6/ Tester le modèle en se connectant à localhost   
 
 ## Support
 Je reste disponible pour plus d'informations

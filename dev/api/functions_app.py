@@ -125,6 +125,9 @@ def expand_contractions(text):
     text = re.sub(r"\b(how|what|where|who|why)'?d\b", r'\g<1> did',
                   text, flags=flags)
 
+    # Suppression des ponctutations sauf ceux protégés
+    # text = re.sub(r'[^\w\s\.\+\#]', '', text)
+
     return text
 
 
@@ -145,8 +148,8 @@ def clean_after_parser(text, protect=[]):
     return ' '.join(txt)
 
 
-class ContractionsComponent(object):
-    name = "Contractions"
+class CleanContractionsComponent(object):
+    name = "CleanContractions"
 
     nlp: Language
 
@@ -269,8 +272,7 @@ def get_unsupervised_tag(doc_topic,
                                     + pred_tag[2] + ',' + pred_tag[3] + ','
                                     + pred_tag[4])
 
-    pred_tag = pred_tag.drop(columns=[0, 1, 2, 3, 4])
-    return pred_tag
+    return pred_tag['unsupervised_tag']
 
 
 def transform_tuple(tup):
@@ -281,10 +283,11 @@ def transform_tuple(tup):
     return tup
 
 
-def supervised_tags(cleaned_text, vectorizer, binarizer, supervised_model):
+def supervised_tags(cleaned_text, vectorizer, binarizer,
+                    supervised_model, treshold=0.11):
     tfidf_cleaned_text = vectorizer.transform([cleaned_text])
     pred = supervised_model.predict_proba(tfidf_cleaned_text)
-    pred = pd.DataFrame(pred).applymap(lambda x: 1 if x > 0.11 else 0)
+    pred = pd.DataFrame(pred).applymap(lambda x: 1 if x > treshold else 0)
     pred = pred.to_numpy()
     return transform_tuple(binarizer.inverse_transform(pred))
 
@@ -297,4 +300,4 @@ def unsupervised_tags(cleaned_text, vectorizer,
     df_tags = get_unsupervised_tag(doc_topic,
                                    df_topic_keywords,
                                    [cleaned_text])
-    return df_tags.unsupervised_tag.to_list()
+    return df_tags  # .unsupervised_tag.to_list()

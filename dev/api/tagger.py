@@ -8,11 +8,16 @@ import os
 
 app = Flask(__name__)
 
-# Initailisation non fonctionnelle si présente dans main (en bas)
+# Seuil à utiliser pour le modèle 10k
+threshold = 0.11
+# Seuil à utiliser pour le modèle 50k
+# threshold = 0.16
+
+# Initialisation non fonctionnelle si présente dans main (en bas)
 # Initialisation du pipeline du nettoyage de texte
 nlp = spacy.load('en_core_web_sm', disable=['ner'])
 nlp.add_pipe(CleanBeforeTaggerComponent(nlp), first=True)
-nlp.add_pipe(ContractionsComponent(nlp), after='CleanBeforeTagger')
+nlp.add_pipe(CleanContractionsComponent(nlp), after='CleanBeforeTagger')
 clean = CleanAfterParserComponent(nlp)
 bag_tags_lst = pd.read_csv('src/bag_tags.csv').list.to_list()
 clean.set_protect(bag_tags_lst)
@@ -39,7 +44,8 @@ def predict():
     sup = supervised_tags(cleaned_text,
                           tfidf_vectorizer,
                           binarizer,
-                          supervised_model)
+                          supervised_model,
+                          treshold=threshold)
     unsup = unsupervised_tags(cleaned_text,
                               count_vectorizer,
                               df_topic_keywords,
