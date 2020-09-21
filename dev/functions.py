@@ -10,6 +10,7 @@ from sklearn.metrics import r2_score
 import datetime as dt
 from IPython.display import Image
 from bs4 import BeautifulSoup
+from IPython.display import Image
 import unidecode
 import en_core_web_sm
 import re
@@ -215,6 +216,8 @@ def export_png_table(data, col_width=2.2, row_height=0.625, font_size=10,
             cell.set_facecolor(row_colors[k[0] % len(row_colors)])
 
     fig.savefig(filename, transparent=True)
+    plt.close()
+    Image(filename)
     return ax
 
 
