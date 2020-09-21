@@ -11,7 +11,7 @@ app = Flask(__name__)
 # Seuil à utiliser pour le modèle 10k
 threshold = 0.11
 # Seuil à utiliser pour le modèle 50k
-# threshold = 0.16
+# threshold = 0.15
 
 # Initialisation non fonctionnelle si présente dans main (en bas)
 # Initialisation du pipeline du nettoyage de texte
